@@ -8,7 +8,7 @@
 
     <groupId>sn</groupId>
     <artifactId>Calculatrice</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
@@ -41,5 +41,25 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- Ajout pour Nexus -->
+<!--    <distributionManagement>-->
+<!--        <repository>-->
+<!--            <id>nexus</id>-->
+<!--            <url>http://localhost:8081/repository/maven-releases/</url>-->
+<!--        </repository>-->
+<!--    </distributionManagement>-->
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>http://localhost:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>nexus-releases</id>
+            <url>http://localhost:8081/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
+
 
 </project>

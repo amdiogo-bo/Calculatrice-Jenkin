@@ -2,23 +2,22 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
+        stage('Clone') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/amdiogo-bo/Calculatrice-Jenkin.git'
+                git 'https://github.com/TON_COMPTE/Calculatrice.git'
             }
         }
 
-        stage('Build & Test') {
+        stage('Build') {
             steps {
-                sh 'mvn clean test'
+                sh 'mvn clean package'
             }
         }
-    }
 
-    post {
-        always {
-            junit 'target/surefire-reports/*.xml'
+        stage('Deploy Nexus') {
+            steps {
+                sh 'mvn deploy'
+            }
         }
     }
 }
