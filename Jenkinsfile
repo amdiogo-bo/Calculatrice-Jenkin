@@ -1,12 +1,15 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven'
-        jdk 'JDK11'
-    }
-
     stages {
+        stage('Clone') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/amdiogo-bo/Calculatrice-Jenkin.git'
+
+            }
+        }
+
         stage('Build') {
             steps {
                 sh 'mvn clean package'
