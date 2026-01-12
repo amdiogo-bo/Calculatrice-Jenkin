@@ -1,13 +1,12 @@
 pipeline {
     agent any
 
-    stages {
-        stage('Clone') {
-            steps {
-                git 'https://github.com/TON_COMPTE/Calculatrice.git'
-            }
-        }
+    tools {
+        maven 'Maven'
+        jdk 'JDK11'
+    }
 
+    stages {
         stage('Build') {
             steps {
                 sh 'mvn clean package'
