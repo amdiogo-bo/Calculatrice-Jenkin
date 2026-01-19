@@ -30,20 +30,8 @@ pipeline {
 
         stage('Deploy Nexus') {
             steps {
-                echo "🚀 Déploiement sur Nexus"
-
-                withCredentials([usernamePassword(
-                    credentialsId: 'nexus-credentials',
-                    usernameVariable: 'NEXUS_USER',
-                    passwordVariable: 'NEXUS_PASS'
-                )]) {
-                    sh '''
-                    mvn deploy \
-                    -DskipTests \
-                    -Dnexus.username=$NEXUS_USER \
-                    -Dnexus.password=$NEXUS_PASS
-                    '''
-                }
+                        echo "🚀 Déploiement sur Nexus"
+                        sh 'mvn clean deploy -DskipTests'
             }
         }
     }
