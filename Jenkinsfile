@@ -7,6 +7,12 @@ pipeline {
         }
 
 
+    environment {
+        // On récupère les credentials depuis Jenkins
+        NEXUS_CRED = credentials('nexus-creds')
+    }
+
+
     stages {
         stage('Clone') {
             steps {
@@ -16,16 +22,17 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                sh 'mvn clean package'
-            }
-        }
+        stage('Build & Test') {
+                    steps {
+                        sh 'mvn clean test'
+                    }
+                }
 
-        stage('Deploy Nexus') {
-            steps {
-                echo "🚀 Déploiement sur Nexus"
-                sh 'mvn deploy'
+        stage('Deploy to Nexus') {
+                steps {
+                    // Maven utilise les credentials pour le deploy
+                    sh "mvn deploy -Dnexus.username=$NEXUS_CRED_USR -Dnexus.password=$NEXUS_CRED_PSW"
+                }
             }
         }
 
