@@ -2,38 +2,48 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven' // NOM EXACT configuré dans Jenkins
-        JDK 'Java'    // NOM EXACT configuré dans Jenkins
+        maven 'Maven'
+        jdk 'Java'
     }
 
     environment {
-        NEXUS_USER = credentials('nexus-credentials') // ID Jenkins Credential
-        NEXUS_PASS = credentials('nexus-credentials')
+        NEXUS_URL = "http://nexus:8081"
+        NEXUS_REPO = "maven-snapshots"
+        GROUP_ID = "sn"
+        ARTIFACT_ID = "Calculatrice"
     }
 
     stages {
+
         stage('Checkout') {
             steps {
-                echo "🔄 Récupération du code depuis GitHub"
-                git url: 'https://github.com/amdiogo-bo/Calculatrice-Jenkin.git', branch: 'main'
+                git branch: 'main',
+                    url: 'https://github.com/amdiogo-bo/Calculatrice-Jenkin.git'
             }
         }
 
-        stage('Build & Test') {
+        stage('Build') {
             steps {
-                echo "⚙️ Compilation et exécution des tests unitaires"
-                sh 'mvn clean test'
+                sh 'mvn clean package'
             }
         }
 
-        stage('Deploy to Nexus') {
+        stage('Deploy Nexus') {
             steps {
-                echo "🚀 Déploiement sur Nexus SNAPSHOT"
-                sh """
-                mvn deploy \
-                  -Dnexus.username=$NEXUS_USER \
-                  -Dnexus.password=$NEXUS_PASS
-                """
+                echo "🚀 Déploiement sur Nexus"
+
+                withCredentials([usernamePassword(
+                    credentialsId: 'nexus-credentials',
+                    usernameVariable: 'NEXUS_USER',
+                    passwordVariable: 'NEXUS_PASS'
+                )]) {
+                    sh '''
+                    mvn deploy \
+                    -DskipTests \
+                    -Dnexus.username=$NEXUS_USER \
+                    -Dnexus.password=$NEXUS_PASS
+                    '''
+                }
             }
         }
     }
@@ -41,12 +51,6 @@ pipeline {
     post {
         always {
             junit '**/target/surefire-reports/*.xml'
-        }
-        success {
-            echo "✅ Build et déploiement réussis !"
-        }
-        failure {
-            echo "❌ Échec du build ou du déploiement."
         }
     }
 }
