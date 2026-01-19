@@ -31,7 +31,7 @@ pipeline {
         stage('Deploy Nexus') {
             steps {
                         echo "🚀 Déploiement sur Nexus"
-                        sh 'mvn clean deploy -DskipTests'
+                        sh 'mvn clean deploy'
             }
         }
     }
