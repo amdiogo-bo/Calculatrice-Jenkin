@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    tools {
+            Maven 'Maven' // Nom configuré dans Jenkins
+            jdk 'Java'    // Nom configuré dans Jenkins
+        }
+
+
     stages {
         stage('Clone') {
             steps {
@@ -18,7 +24,14 @@ pipeline {
 
         stage('Deploy Nexus') {
             steps {
+                echo "🚀 Déploiement sur Nexus"
                 sh 'mvn deploy'
+            }
+        }
+
+        post {
+            always {
+                junit '**/target/surefire-reports/*.xml'
             }
         }
     }
