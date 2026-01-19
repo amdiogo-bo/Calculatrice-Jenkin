@@ -2,6 +2,14 @@ pipeline {
     agent any
 
     stages {
+        stage('Clone') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/amdiogo-bo/Calculatrice-Jenkin.git'
+
+            }
+        }
+
         stage('Build') {
             steps {
                 sh 'mvn clean package'
@@ -10,7 +18,7 @@ pipeline {
 
         stage('Deploy Nexus') {
             steps {
-                sh 'mvn deploy -s /var/jenkins_home/.m2/settings.xml'
+                sh 'mvn deploy'
             }
         }
     }
