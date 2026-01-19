@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         maven 'Maven' // NOM EXACT configuré dans Jenkins
-        jdk 'Java'    // NOM EXACT configuré dans Jenkins
+        JDK 'Java'    // NOM EXACT configuré dans Jenkins
     }
 
     environment {
