@@ -15,6 +15,7 @@ pipeline {
                 sh 'mvn clean package'
             }
         }
+        //nexus
 
         stage('Deploy Nexus') {
             steps {
