@@ -2,44 +2,51 @@ pipeline {
     agent any
 
     tools {
-            Maven 'maven' // Nom configuré dans Jenkins
-            jdk 'Java'    // Nom configuré dans Jenkins
-        }
-
-
-    environment {
-        // On récupère les credentials depuis Jenkins
-        NEXUS_CRED = credentials('nexus-creds')
+        maven 'Maven' // NOM EXACT configuré dans Jenkins
+        jdk 'Java'    // NOM EXACT configuré dans Jenkins
     }
 
+    environment {
+        NEXUS_USER = credentials('nexus-credentials') // ID Jenkins Credential
+        NEXUS_PASS = credentials('nexus-credentials')
+    }
 
     stages {
-        stage('Clone') {
+        stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/amdiogo-bo/Calculatrice-Jenkin.git'
-
+                echo "🔄 Récupération du code depuis GitHub"
+                git url: 'https://github.com/amdiogo-bo/Calculatrice-Jenkin.git', branch: 'main'
             }
         }
 
         stage('Build & Test') {
-                    steps {
-                        sh 'mvn clean test'
-                    }
-                }
-
-        stage('Deploy to Nexus') {
-                steps {
-                    // Maven utilise les credentials pour le deploy
-                    sh "mvn deploy -Dnexus.username=$NEXUS_CRED_USR -Dnexus.password=$NEXUS_CRED_PSW"
-                }
+            steps {
+                echo "⚙️ Compilation et exécution des tests unitaires"
+                sh 'mvn clean test'
             }
         }
 
-        post {
-            always {
-                junit '**/target/surefire-reports/*.xml'
+        stage('Deploy to Nexus') {
+            steps {
+                echo "🚀 Déploiement sur Nexus SNAPSHOT"
+                sh """
+                mvn deploy \
+                  -Dnexus.username=$NEXUS_USER \
+                  -Dnexus.password=$NEXUS_PASS
+                """
             }
+        }
+    }
+
+    post {
+        always {
+            junit '**/target/surefire-reports/*.xml'
+        }
+        success {
+            echo "✅ Build et déploiement réussis !"
+        }
+        failure {
+            echo "❌ Échec du build ou du déploiement."
         }
     }
 }
