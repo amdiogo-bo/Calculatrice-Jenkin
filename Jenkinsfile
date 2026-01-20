@@ -34,11 +34,11 @@ pipeline {
 
         stage('Analyse SonarQube') {
             steps {
-                withSonarQubeEnv("${SONARQUBE_SERVER}") {
+                withSonarQubeEnv('SonarQube') {
                     sh """
-                        mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.10.0.2594:sonar \
-                        -Dsonar.projectKey=${ARTIFACT_ID} \
-                        -Dsonar.projectName=${ARTIFACT_ID} \
+                        mvn clean verify sonar:sonar \
+                        -Dsonar.projectKey=Calculatrice \
+                        -Dsonar.projectName=Calculatrice \
                         -Dsonar.projectVersion=1.0 \
                         -Dsonar.sources=src/main/java \
                         -Dsonar.tests=src/test/java \
@@ -47,6 +47,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Deploy Nexus') {
             steps {
