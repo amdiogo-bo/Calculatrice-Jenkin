@@ -36,7 +36,7 @@ pipeline {
             steps {
                 withSonarQubeEnv("${SONARQUBE_SERVER}") {
                     sh """
-                        mvn sonar:sonar \
+                        mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.10.0.2594:sonar \
                         -Dsonar.projectKey=${ARTIFACT_ID} \
                         -Dsonar.projectName=${ARTIFACT_ID} \
                         -Dsonar.projectVersion=1.0 \
