@@ -2,68 +2,49 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven'
-        jdk 'java'
-    }
-
-    environment {
-        // SonarQube
-        SONARQUBE_SERVER = 'SonarQube'
-
-        // Nexus
-        NEXUS_URL = "http://nexus:8081"
-        NEXUS_REPO = "maven-snapshots"
-        GROUP_ID = "sn"
-        ARTIFACT_ID = "Calculatrice"
-    }
+            maven 'Maven'
+            jdk 'java'
+        }
 
     stages {
-
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/amdiogo-bo/Calculatrice-Jenkin.git'
+                    url: 'https://github.com/amdiogo-bo/Calculatrice-Jenkin.git',
+                    credentialsId: 'github-credentials'
             }
         }
 
-        stage('Build & Test') {
+        stage('Build') {
             steps {
-                sh 'mvn clean verify'
+                sh 'mvn clean compile'
             }
         }
 
-        stage('Analyse SonarQube') {
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+        stage('SonarQube') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh """
-                        mvn clean verify sonar:sonar \
-                        -Dsonar.projectKey=Calculatrice \
-                        -Dsonar.projectName=Calculatrice \
-                        -Dsonar.projectVersion=1.0 \
-                        -Dsonar.sources=src/main/java \
-                        -Dsonar.tests=src/test/java \
-                        -Dsonar.java.binaries=target/classes
-                    """
+                    sh 'mvn sonar:sonar'
                 }
             }
         }
 
-
         stage('Deploy Nexus') {
             steps {
-                echo "🚀 Déploiement sur Nexus"
-                sh """
-                    mvn clean deploy -DskipTests \
-                    -Dnexus.url=${NEXUS_URL} \
-                    -Dnexus.repo=${NEXUS_REPO}
-                """
+                sh 'mvn deploy'
             }
         }
     }
 
     post {
         always {
-            junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
+            junit '**/target/surefire-reports/*.xml'
         }
     }
 }
