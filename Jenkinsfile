@@ -8,9 +8,6 @@ pipeline {
 
     environment {
         SONAR_HOST_URL = 'http://sonarqube:9000'
-        SONARQUBE_SERVER = 'SonarQube'
-        SONAR_TOKEN = credentials('sonar-token')
-        NEXUS_CREDENTIALS = credentials('nexus-credentials')
     }
 
     stages {
@@ -22,9 +19,9 @@ pipeline {
             }
         }
 
-        stage('Compile & Test') {
+        stage('Build & Test') {
             steps {
-                sh 'mvn clean test'
+                sh 'mvn clean verify'
             }
         }
 
@@ -40,22 +37,33 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                sh 'mvn clean package -DskipTests'
-            }
-        }
-
         stage('Deploy to Nexus') {
             steps {
-                sh 'mvn deploy'
+                withCredentials([usernamePassword(
+                    credentialsId: 'nexus-credentials',
+                    usernameVariable: 'NEXUS_USER',
+                    passwordVariable: 'NEXUS_PWD'
+                )]) {
+                    sh '''
+                    mvn deploy \
+                    -DskipTests \
+                    -Dnexus.username=$NEXUS_USER \
+                    -Dnexus.password=$NEXUS_PWD
+                    '''
+                }
             }
         }
     }
 
     post {
         always {
-            junit '**/target/surefire-reports/*.xml'
+            script {
+                if (fileExists('target/surefire-reports')) {
+                    junit 'target/surefire-reports/*.xml'
+                } else {
+                    echo 'Aucun rapport JUnit trouvé'
+                }
+            }
         }
     }
 }
